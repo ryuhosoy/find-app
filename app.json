@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "mitsukeru",
+    "name": "ミツケル",
     "slug": "mitsukeru",
     "version": "1.0.0",
+    "scheme": "mitsukeru",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,7 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FF6B3D",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -20,6 +21,19 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "棚の写真を選ぶために写真ライブラリへのアクセスを使用します。",
+          "cameraPermission": "棚を撮影するためにカメラへのアクセスを使用します。"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
