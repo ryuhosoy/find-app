@@ -58,6 +58,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const raw = await analyzeShelf({
         base64Image: prepared.base64,
         mediaType: prepared.mediaType,
+        imageWidth: prepared.width,
+        imageHeight: prepared.height,
         mode,
         query: query.trim(),
       });

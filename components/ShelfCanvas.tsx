@@ -19,7 +19,8 @@ interface Props {
   boxes: CanvasBox[];
 }
 
-const pct = (n: number) => `${(n / 10).toFixed(2)}%` as unknown as `${number}%`;
+/** 0-1 正規化座標 → CSS パーセント */
+const pct = (n: number) => `${(n * 100).toFixed(2)}%` as unknown as `${number}%`;
 
 export function ShelfCanvas({ imageUri, imageWidth, imageHeight, boxes }: Props) {
   const [containerWidth, setContainerWidth] = useState(0);
@@ -47,7 +48,7 @@ export function ShelfCanvas({ imageUri, imageWidth, imageHeight, boxes }: Props)
           {secondariesFirst.map((b) => {
             const [x1, y1, x2, y2] = b.box;
             const isPrimary = b.kind === 'primary';
-            const labelBelow = y1 < 90; // 上端近くなら枠の内側上に表示
+            const labelBelow = y1 < 0.09; // 上端近くなら枠の内側上に表示
 
             return (
               <View

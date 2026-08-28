@@ -2,7 +2,7 @@ export type AppMode = 'search' | 'recommend';
 
 export type Confidence = 'high' | 'medium' | 'low';
 
-/** 0-1000 スケールの正規化座標 [x_min, y_min, x_max, y_max]（左上原点）。 */
+/** 0-1 スケールの正規化座標 [x_min, y_min, x_max, y_max]（左上原点）。 */
 export type Box2D = [number, number, number, number];
 
 export interface DbNutrition {

@@ -1,5 +1,7 @@
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
+import { resizedSize } from './visionCoords';
+
 export interface PreparedImage {
   /** API に送ったものと同じファイル。結果画面の枠重ねにもこれを使う */
   uri: string;
@@ -10,18 +12,32 @@ export interface PreparedImage {
 }
 
 /**
- * API送信用に画像を縮小・圧縮する。トークン量とレイテンシを抑えつつ、
- * 商品パッケージの文字が判別できる程度の解像度（長辺1280px）を確保する。
+ * API送信用に画像を Claude がそのまま見るサイズへリサイズする。
+ * EXIF 向きもここで焼き付けるため、結果画面の枠表示もこの URI / 寸法を使うこと。
  *
- * 向き（EXIF）もここで焼き付けるため、結果画面の枠表示もこの URI / 寸法を使うこと。
- * 元画像のまま重ねると向きや比率の差で枠がズレる。
+ * @see https://platform.claude.com/docs/en/build-with-claude/vision-coordinates
  */
 export async function prepareImageForApi(uri: string): Promise<PreparedImage> {
-  const result = await manipulateAsync(uri, [{ resize: { width: 1280 } }], {
-    compress: 0.75,
+  // EXIF 向きを焼き付け（アクションなしでも JPEG 変換で向きが正規化される）
+  const oriented = await manipulateAsync(uri, [], {
+    compress: 1,
     format: SaveFormat.JPEG,
-    base64: true,
   });
+
+  const [targetW, targetH] = resizedSize(oriented.width, oriented.height);
+
+  const needsResize = oriented.width !== targetW || oriented.height !== targetH;
+  const result = needsResize
+    ? await manipulateAsync(oriented.uri, [{ resize: { width: targetW, height: targetH } }], {
+        compress: 0.75,
+        format: SaveFormat.JPEG,
+        base64: true,
+      })
+    : await manipulateAsync(oriented.uri, [], {
+        compress: 0.75,
+        format: SaveFormat.JPEG,
+        base64: true,
+      });
 
   if (!result.base64) {
     throw new Error('画像の変換に失敗しました。');
