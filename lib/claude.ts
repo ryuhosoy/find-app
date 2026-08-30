@@ -69,7 +69,7 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
         matches: {
           type: 'array',
           description:
-            '該当・候補の各個体。同じ商品が複数箇所にあれば、箇所ごとに1件ずつ（枠線もそれぞれ）。おすすめモードでは recommended 以外の候補も含めてよい。',
+            '該当・候補の各個体。同じ商品が複数箇所にあれば、箇所ごとに1件ずつ（枠線もそれぞれ）。おすすめモードでは recommended 以外の比較候補も含め、商品名ごとに1件ずつ入れる。',
           items: {
             type: 'object',
             properties: {
@@ -80,6 +80,11 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
                 minItems: 4,
                 maxItems: 4,
                 description: boxDesc,
+              },
+              note: {
+                type: 'string',
+                description:
+                  'この商品の簡単な情報（特徴・カロリー/カフェイン等の概算、ユーザーの要望との関係）。日本語1文。おすすめモードの比較候補では、選ばなかった理由やイチオシとの違いも簡潔に。',
               },
               confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
             },
@@ -112,8 +117,9 @@ ${coordHint}
   return `${common}
 現在のモードは「おすすめ」です。ユーザーはカロリー・カフェイン量・気分など条件や要望を伝えます。
 画像内の関連しそうな商品（お菓子や飲料など）を見比べ、ユーザーの要望に最も合う1つを recommended として選び、
-なぜそれを選んだのかを具体的な理由と共に答えてください。比較のために検討した他の候補も matches に含めてください。
-栄養成分などの数値に触れる場合は、あなたの一般知識に基づく概算として reason や answer に含め、
+なぜそれを選んだのかを具体的な理由と共に答えてください。
+比較のために検討した他の候補も matches に含め、各候補には note で簡単な情報（特徴・概算値・要望との関係、選ばなかった理由）を1文で付けてください。
+栄養成分などの数値に触れる場合は、あなたの一般知識に基づく概算として reason や note に含め、
 断定しすぎず「〜と思われます」程度のトーンにしてください。`;
 }
 
@@ -229,6 +235,7 @@ function normalizeRawAnalysis(input: any, imageWidth: number, imageHeight: numbe
           name: String(m.name),
           box_2d: toBox(m.box_2d),
           confidence: normalizeConfidence(m.confidence),
+          note: typeof m.note === 'string' && m.note.trim() ? m.note.trim() : undefined,
         }))
     : [];
 

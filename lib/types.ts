@@ -9,6 +9,8 @@ export interface RawMatch {
   name: string;
   box_2d: Box2D;
   confidence: Confidence;
+  /** 商品の簡単な情報（比較候補・見つかった商品向け） */
+  note?: string;
 }
 
 export interface RawRecommended extends RawMatch {

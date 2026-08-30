@@ -33,6 +33,18 @@ export default function ResultScreen() {
     }));
   }, [result]);
 
+  const otherCandidates = useMemo(() => {
+    if (!result || result.mode !== 'recommend' || !result.recommended) return [];
+    const recName = result.recommended.name;
+    const seen = new Set<string>();
+    return result.matches.filter((m) => {
+      if (m.name === recName) return false;
+      if (seen.has(m.name)) return false;
+      seen.add(m.name);
+      return true;
+    });
+  }, [result]);
+
   if (!result) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -43,11 +55,6 @@ export default function ResultScreen() {
       </SafeAreaView>
     );
   }
-
-  const otherCandidates =
-    result.mode === 'recommend' && result.recommended
-      ? result.matches.filter((m) => m.name !== result.recommended!.name)
-      : [];
 
   const goRetry = () => {
     resetResult();
@@ -121,7 +128,13 @@ export default function ResultScreen() {
             <Text style={styles.sectionLabel}>比較した他の候補</Text>
             <View style={styles.candidateList}>
               {otherCandidates.map((m, i) => (
-                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} />
+                <ProductCard
+                  key={`${m.name}-${i}`}
+                  name={m.name}
+                  reason={m.note}
+                  confidence={m.confidence}
+                  compact
+                />
               ))}
             </View>
           </>

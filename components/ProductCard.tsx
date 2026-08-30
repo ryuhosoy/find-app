@@ -10,6 +10,8 @@ interface Props {
   reason?: string;
   confidence: Confidence;
   emphasis?: boolean;
+  /** 候補リストなど、短い注記のみの表示 */
+  compact?: boolean;
 }
 
 const CONFIDENCE_LABEL: Record<Confidence, string> = {
@@ -18,7 +20,7 @@ const CONFIDENCE_LABEL: Record<Confidence, string> = {
   low: '確信度: 低（見え方によっては別商品の可能性）',
 };
 
-export function ProductCard({ name, reason, confidence, emphasis }: Props) {
+export function ProductCard({ name, reason, confidence, emphasis, compact }: Props) {
   return (
     <View style={[styles.card, emphasis && styles.cardEmphasis, emphasis && shadow.card]}>
       <View style={styles.headerRow}>
@@ -32,9 +34,11 @@ export function ProductCard({ name, reason, confidence, emphasis }: Props) {
 
       <Text style={styles.confidence}>{CONFIDENCE_LABEL[confidence]}</Text>
 
-      <Text style={styles.disclaimer}>
-        商品名・理由・数値はAIの判断です。正確な情報は必ずパッケージをご確認ください。
-      </Text>
+      {!compact && (
+        <Text style={styles.disclaimer}>
+          商品名・理由・数値はAIの判断です。正確な情報は必ずパッケージをご確認ください。
+        </Text>
+      )}
     </View>
   );
 }
