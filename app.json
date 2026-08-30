@@ -43,11 +43,6 @@
     "experiments": {
       "typedRoutes": true
     },
-    "extra": {
-      "eas": {
-        "projectId": "baa55a6f-ce9c-493a-9ccf-10aae8cabb3b"
-      }
-    },
     "owner": "ryuhosoy"
   }
 }
