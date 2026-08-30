@@ -87,8 +87,8 @@ export default function HomeScreen() {
                 <Text style={styles.logoEmoji}>🛒</Text>
               </View>
               <View>
-                <Text style={styles.brand}>ミツケル</Text>
-                <Text style={styles.tagline}>棚の写真から、欲しい一つを見つける。</Text>
+                <Text style={styles.brand}>Buy it!</Text>
+                <Text style={styles.tagline}>棚を撮って、買う一つを決める。</Text>
               </View>
             </View>
           </View>
