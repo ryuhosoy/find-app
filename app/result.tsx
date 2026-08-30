@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '../components/Badge';
+import { ImagePreviewModal } from '../components/ImagePreviewModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProductCard } from '../components/ProductCard';
 import { CanvasBox, ShelfCanvas } from '../components/ShelfCanvas';
@@ -12,31 +13,22 @@ import { colors, font, radius, shadow, spacing } from '../lib/theme';
 
 export default function ResultScreen() {
   const { result, mode, query, setImage, resetResult } = useSession();
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const boxes: CanvasBox[] = useMemo(() => {
     if (!result) return [];
     if (result.mode === 'recommend' && result.recommended) {
-      const recName = result.recommended.name;
-      const others = result.matches.filter((m) => m.name !== recName);
       return [
         {
           key: 'recommended',
           box: result.recommended.box_2d,
-          label: result.recommended.name,
           kind: 'primary',
         },
-        ...others.map((m, i) => ({
-          key: `candidate-${i}`,
-          box: m.box_2d,
-          label: m.name,
-          kind: 'secondary' as const,
-        })),
       ];
     }
     return result.matches.map((m, i) => ({
       key: `match-${i}`,
       box: m.box_2d,
-      label: m.name,
       kind: 'primary' as const,
     }));
   }, [result]);
@@ -85,11 +77,23 @@ export default function ResultScreen() {
           imageWidth={result.imageWidth}
           imageHeight={result.imageHeight}
           boxes={boxes}
+          onPress={() => setPreviewOpen(true)}
         />
 
-        <View style={styles.answerCard}>
-          <Text style={styles.answerText}>{result.answer || (result.notFound ? '見つかりませんでした。' : '')}</Text>
-        </View>
+        <ImagePreviewModal
+          visible={previewOpen}
+          imageUri={result.imageUri}
+          imageWidth={result.imageWidth}
+          imageHeight={result.imageHeight}
+          boxes={boxes}
+          onClose={() => setPreviewOpen(false)}
+        />
+
+        {(result.mode !== 'recommend' || !result.recommended) && (
+          <View style={styles.answerCard}>
+            <Text style={styles.answerText}>{result.answer || (result.notFound ? '見つかりませんでした。' : '')}</Text>
+          </View>
+        )}
 
         {result.notFound && (
           <View style={styles.notFoundCard}>
@@ -107,7 +111,6 @@ export default function ResultScreen() {
               name={result.recommended.name}
               reason={result.recommended.reason}
               confidence={result.recommended.confidence}
-              db={result.recommended.db}
               emphasis
             />
           </>
@@ -118,7 +121,7 @@ export default function ResultScreen() {
             <Text style={styles.sectionLabel}>比較した他の候補</Text>
             <View style={styles.candidateList}>
               {otherCandidates.map((m, i) => (
-                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} db={m.db} />
+                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} />
               ))}
             </View>
           </>
@@ -129,7 +132,7 @@ export default function ResultScreen() {
             <Text style={styles.sectionLabel}>見つかった商品</Text>
             <View style={styles.candidateList}>
               {result.matches.map((m, i) => (
-                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} db={m.db} />
+                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} />
               ))}
             </View>
           </>

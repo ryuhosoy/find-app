@@ -16,10 +16,7 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: colors.bg },
             animation: 'slide_from_right',
           }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="result" />
-        </Stack>
+        />
       </SessionProvider>
     </SafeAreaProvider>
   );

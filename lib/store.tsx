@@ -1,9 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-import { matchProduct, toDbNutrition } from '../data/products';
 import { analyzeShelf, ClaudeApiError, ClaudeConfigError, hasApiKey as hasApiKeyFn } from './claude';
 import { prepareImageForApi } from './imagePrep';
-import type { AnalysisResult, AppMode, EnrichedItem, EnrichedRecommended } from './types';
+import type { AnalysisResult, AppMode } from './types';
 
 export interface PickedImage {
   uri: string;
@@ -64,25 +63,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         query: query.trim(),
       });
 
-      const matches: EnrichedItem[] = raw.matches.map((m) => {
-        const product = matchProduct(m.name);
-        return { ...m, db: product ? toDbNutrition(product) : null };
-      });
-
-      let recommended: EnrichedRecommended | null = null;
-      if (raw.recommended) {
-        const product = matchProduct(raw.recommended.name);
-        recommended = { ...raw.recommended, db: product ? toDbNutrition(product) : null };
-      }
-
-      // 枠座標は API が見た画像基準なので、表示も prepared と同じものを使う
       setResult({
         mode,
         query: query.trim(),
         answer: raw.answer,
         notFound: raw.not_found,
-        recommended,
-        matches,
+        recommended: raw.recommended ?? null,
+        matches: raw.matches,
         imageUri: prepared.uri,
         imageWidth: prepared.width,
         imageHeight: prepared.height,

@@ -169,7 +169,7 @@ export default function HomeScreen() {
 
           {mode === 'recommend' && (
             <View style={styles.footNote}>
-              <Badge label="主要商品は自社DBで数値を裏付け" tone="good" />
+              <Badge label="商品情報はAIが判断" tone="neutral" />
             </View>
           )}
         </ScrollView>
