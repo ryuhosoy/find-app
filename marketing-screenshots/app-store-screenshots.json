@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 2,
+  "appName": "Buy it!",
+  "themeId": "buy-it-warm",
+  "connectedCanvas": true,
+  "locales": [
+    "ja",
+    "en"
+  ],
+  "locale": "ja",
+  "device": "ipad",
+  "orientation": "portrait",
+  "appIcon": "/app-icon.png",
+  "slidesByDevice": {
+    "iphone": [
+      {
+        "id": "hero",
+        "layout": "hero",
+        "label": {
+          "ja": "BUY IT!",
+          "en": "BUY IT!"
+        },
+        "headline": {
+          "ja": "棚を撮って、\n買う一つを決める。",
+          "en": "Snap the shelf.\nPick what to buy."
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/02-query.png"
+      },
+      {
+        "id": "find",
+        "layout": "device-bottom",
+        "label": {
+          "ja": "さがす",
+          "en": "FIND"
+        },
+        "headline": {
+          "ja": "欲しい商品を\nすぐ見つける",
+          "en": "Find what you\nwant instantly"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/03-find.png"
+      },
+      {
+        "id": "recommend",
+        "layout": "device-top",
+        "label": {
+          "ja": "えらんで",
+          "en": "CHOOSE"
+        },
+        "headline": {
+          "ja": "AIが理由付きで\nおすすめ",
+          "en": "AI picks one\nwith reasons"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/04-recommend.png",
+        "inverted": true
+      },
+      {
+        "id": "natural",
+        "layout": "device-bottom",
+        "label": {
+          "ja": "かんたん",
+          "en": "SIMPLE"
+        },
+        "headline": {
+          "ja": "話しかける\nように聞くだけ",
+          "en": "Just ask\nlike you talk"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/02-query.png"
+      },
+      {
+        "id": "visual",
+        "layout": "two-devices",
+        "label": {
+          "ja": "ひと目で",
+          "en": "AT A GLANCE"
+        },
+        "headline": {
+          "ja": "枠で示して\n迷わない",
+          "en": "Highlights show\nyou where"
+        },
+        "screenshot": "/screenshots/apple/iphone/{locale}/02-query.png",
+        "screenshotSecondary": "/screenshots/apple/iphone/{locale}/03-find.png"
+      },
+      {
+        "id": "more",
+        "layout": "no-device",
+        "label": {
+          "ja": "もっと",
+          "en": "AND MORE"
+        },
+        "headline": {
+          "ja": "撮影\n検索\n比較\nおすすめ\n拡大プレビュー",
+          "en": "Capture\nSearch\nCompare\nRecommend\nZoom preview"
+        },
+        "screenshot": ""
+      }
+    ],
+    "android": [],
+    "ipad": [
+      {
+        "id": "ipad-hero",
+        "layout": "hero",
+        "label": {
+          "ja": "BUY IT!",
+          "en": "BUY IT!"
+        },
+        "headline": {
+          "ja": "大きな画面で\n棚をスマートに",
+          "en": "Shop smarter\non the big screen"
+        },
+        "screenshot": "/screenshots/apple/ipad/{locale}/02-query.png"
+      },
+      {
+        "id": "ipad-find",
+        "layout": "device-bottom",
+        "label": {
+          "ja": "さがす",
+          "en": "FIND"
+        },
+        "headline": {
+          "ja": "欲しい商品を\nすぐ見つける",
+          "en": "Find what you\nwant instantly"
+        },
+        "screenshot": "/screenshots/apple/ipad/{locale}/03-find.png"
+      },
+      {
+        "id": "ipad-recommend",
+        "layout": "device-top",
+        "label": {
+          "ja": "えらんで",
+          "en": "CHOOSE"
+        },
+        "headline": {
+          "ja": "条件に合う\n1つを提案",
+          "en": "One pick that\nfits your need"
+        },
+        "screenshot": "/screenshots/apple/ipad/{locale}/04-recommend.png",
+        "inverted": true
+      },
+      {
+        "id": "ipad-compare",
+        "layout": "device-bottom",
+        "label": {
+          "ja": "比較",
+          "en": "COMPARE"
+        },
+        "headline": {
+          "ja": "候補を並べて\n納得して選ぶ",
+          "en": "See alternatives\nchoose with confidence"
+        },
+        "screenshot": "/screenshots/apple/ipad/{locale}/04-recommend.png"
+      }
+    ],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": []
+  },
+  "crossScreenMockupsByDevice": {
+    "iphone": [],
+    "ipad": [],
+    "android": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": []
+  }
+}

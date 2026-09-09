@@ -1,4 +1,4 @@
-import type { AppMode, Confidence, RawAnalysis } from './types';
+import type { Confidence, RawAnalysis } from './types';
 import { pixelBoxToNormalized } from './visionCoords';
 
 /**
@@ -48,7 +48,7 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
         recommended: {
           type: 'object',
           description:
-            '「おすすめモード」で最適と判断した1商品。「さがすモード」では基本的に省略してよい。',
+            '比較・選びたい要望のとき、最適と判断した1商品。特定商品の検索だけの要望では省略してよい。',
           properties: {
             name: { type: 'string', description: '商品名（パッケージに書かれている名称）' },
             box_2d: {
@@ -69,7 +69,7 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
         matches: {
           type: 'array',
           description:
-            '該当・候補の各個体。同じ商品が複数箇所にあれば、箇所ごとに1件ずつ（枠線もそれぞれ）。おすすめモードでは recommended 以外の比較候補も含め、商品名ごとに1件ずつ入れる。',
+            '該当・候補の各個体。同じ商品が複数箇所にあれば、箇所ごとに1件ずつ（枠線もそれぞれ）。比較・選定の要望では recommended 以外の候補も含め、商品名ごとに1件ずつ入れる。',
           items: {
             type: 'object',
             properties: {
@@ -84,7 +84,7 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
               note: {
                 type: 'string',
                 description:
-                  'この商品の簡単な情報（特徴・カロリー/カフェイン等の概算、ユーザーの要望との関係）。日本語1文。おすすめモードの比較候補では、選ばなかった理由やイチオシとの違いも簡潔に。',
+                  'この商品の簡単な情報（特徴・カロリー/カフェイン等の概算、ユーザーの要望との関係）。日本語1文。比較候補では、選ばなかった理由やイチオシとの違いも簡潔に。',
               },
               confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
             },
@@ -97,30 +97,22 @@ function buildAnalysisTool(imageWidth: number, imageHeight: number) {
   };
 }
 
-function buildSystemPrompt(mode: AppMode, imageWidth: number, imageHeight: number): string {
+function buildSystemPrompt(imageWidth: number, imageHeight: number): string {
   const coordHint = `画像サイズは ${imageWidth}×${imageHeight} ピクセルです。原点 (0,0) は左上、x は右方向、y は下方向です。
 box_2d は各商品パッケージをぴったり囲む [x_min, y_min, x_max, y_max] のピクセル座標で返してください。0〜1000 の正規化座標は使わないでください。`;
 
-  const common = `あなたはコンビニ・スーパーの棚を撮影した写真を見て、ユーザーの要望に応える商品検索アシスタントです。
+  return `あなたはコンビニ・スーパーの棚を撮影した写真を見て、ユーザーの要望に応える商品アシスタントです。
 ${coordHint}
 必ず画像に実際に写っている商品だけを対象にし、写っていない商品を推測で答えないでください。
 該当する部分に枠線をつけてください。同じ商品が複数箇所にある場合は、全てに枠線をつけてください（matches に1箇所1件ずつ入れる）。
+
+要望の内容に応じて次のように対応してください。
+- 特定の商品を探す要望（色・銘柄名・見た目など）→ matches に該当商品を全て入れる。recommended は省略してよい。
+- 比較して選びたい要望（カロリー・カフェイン・おすすめ・どれがいいなど）→ 最も合う1つを recommended に選び、比較候補を matches に含める。各候補には note を付ける。
+
+似た色・形の別商品と取り違えないよう、パッケージの文字やロゴまで注意深く見て判断してください。
+栄養成分などの数値に触れる場合は、一般知識に基づく概算として述べ、「〜と思われます」程度のトーンにしてください。
 結果は必ず ${TOOL_NAME} ツールの呼び出しとして返し、それ以外の文章は出力しないでください。`;
-
-  if (mode === 'search') {
-    return `${common}
-現在のモードは「さがす」です。ユーザーは色・銘柄名・見た目の特徴などで特定の商品を指定します。
-似た色・形の別商品（例: 同じブランドのカラーバリエーション違い）と取り違えないよう、パッケージの文字やロゴまで注意深く見て判断してください。
-該当する商品が画像内に複数個（同じ商品が並んでいる等）写っている場合は、漏らさず全て matches に含め、それぞれに枠線をつけてください。`;
-  }
-
-  return `${common}
-現在のモードは「おすすめ」です。ユーザーはカロリー・カフェイン量・気分など条件や要望を伝えます。
-画像内の関連しそうな商品（お菓子や飲料など）を見比べ、ユーザーの要望に最も合う1つを recommended として選び、
-なぜそれを選んだのかを具体的な理由と共に答えてください。
-比較のために検討した他の候補も matches に含め、各候補には note で簡単な情報（特徴・概算値・要望との関係、選ばなかった理由）を1文で付けてください。
-栄養成分などの数値に触れる場合は、あなたの一般知識に基づく概算として reason や note に含め、
-断定しすぎず「〜と思われます」程度のトーンにしてください。`;
 }
 
 function stripDataUrlPrefix(base64: string): string {
@@ -133,7 +125,6 @@ export interface AnalyzeShelfParams {
   mediaType: 'image/jpeg' | 'image/png';
   imageWidth: number;
   imageHeight: number;
-  mode: AppMode;
   query: string;
 }
 
@@ -142,7 +133,6 @@ export async function analyzeShelf({
   mediaType,
   imageWidth,
   imageHeight,
-  mode,
   query,
 }: AnalyzeShelfParams): Promise<RawAnalysis> {
   if (!hasApiKey()) {
@@ -151,16 +141,13 @@ export async function analyzeShelf({
     );
   }
 
-  const userText =
-    mode === 'search'
-      ? `この写真の中から次の商品を探してください：「${query}」`
-      : `この写真に写っている商品の中から、次の要望に一番合う商品を選んでください：「${query}」`;
+  const userText = `この写真について、次の要望に答えてください：「${query}」`;
 
   const body = {
     model: ANTHROPIC_MODEL,
     max_tokens: 1500,
     // claude-sonnet-5 系では temperature 指定が invalid_request になるため送らない
-    system: buildSystemPrompt(mode, imageWidth, imageHeight),
+    system: buildSystemPrompt(imageWidth, imageHeight),
     tools: [buildAnalysisTool(imageWidth, imageHeight)],
     tool_choice: { type: 'tool', name: TOOL_NAME },
     messages: [

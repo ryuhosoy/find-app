@@ -3,7 +3,6 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Badge } from '../components/Badge';
 import { ImagePreviewModal } from '../components/ImagePreviewModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProductCard } from '../components/ProductCard';
@@ -12,12 +11,12 @@ import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
 
 export default function ResultScreen() {
-  const { result, mode, query, setImage, resetResult } = useSession();
+  const { result, query, setImage, resetResult } = useSession();
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const boxes: CanvasBox[] = useMemo(() => {
     if (!result) return [];
-    if (result.mode === 'recommend' && result.recommended) {
+    if (result.recommended) {
       return [
         {
           key: 'recommended',
@@ -34,7 +33,7 @@ export default function ResultScreen() {
   }, [result]);
 
   const otherCandidates = useMemo(() => {
-    if (!result || result.mode !== 'recommend' || !result.recommended) return [];
+    if (!result?.recommended) return [];
     const recName = result.recommended.name;
     const seen = new Set<string>();
     return result.matches.filter((m) => {
@@ -74,7 +73,6 @@ export default function ResultScreen() {
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backText}>← 戻る</Text>
           </Pressable>
-          <Badge label={mode === 'search' ? '🔎 さがす' : '✨ えらんで'} tone="accent" />
         </View>
 
         <Text style={styles.queryLabel}>「{query}」</Text>
@@ -96,7 +94,7 @@ export default function ResultScreen() {
           onClose={() => setPreviewOpen(false)}
         />
 
-        {(result.mode !== 'recommend' || !result.recommended) && (
+        {!result.recommended && (
           <View style={styles.answerCard}>
             <Text style={styles.answerText}>{result.answer || (result.notFound ? '見つかりませんでした。' : '')}</Text>
           </View>
@@ -111,7 +109,7 @@ export default function ResultScreen() {
           </View>
         )}
 
-        {result.mode === 'recommend' && result.recommended && (
+        {result.recommended && (
           <>
             <Text style={styles.sectionLabel}>🎯 イチオシ</Text>
             <ProductCard
@@ -140,12 +138,12 @@ export default function ResultScreen() {
           </>
         )}
 
-        {result.mode === 'search' && result.matches.length > 0 && (
+        {!result.recommended && result.matches.length > 0 && (
           <>
             <Text style={styles.sectionLabel}>見つかった商品</Text>
             <View style={styles.candidateList}>
               {result.matches.map((m, i) => (
-                <ProductCard key={`${m.name}-${i}`} name={m.name} confidence={m.confidence} />
+                <ProductCard key={`${m.name}-${i}`} name={m.name} reason={m.note} confidence={m.confidence} />
               ))}
             </View>
           </>

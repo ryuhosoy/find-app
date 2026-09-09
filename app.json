@@ -6,6 +6,11 @@
     "scheme": "buyit",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF7F2"
+    },
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
@@ -43,6 +48,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "ryuhosoy"
+    "owner": "ryuhosoy",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f8568be4-404f-4f21-8843-acc4e5808bf6"
+      }
+    }
   }
 }

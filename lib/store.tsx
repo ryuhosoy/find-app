@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 
 import { analyzeShelf, ClaudeApiError, ClaudeConfigError, hasApiKey as hasApiKeyFn } from './claude';
 import { prepareImageForApi } from './imagePrep';
-import type { AnalysisResult, AppMode } from './types';
+import type { AnalysisResult } from './types';
 
 export interface PickedImage {
   uri: string;
@@ -12,7 +12,6 @@ export interface PickedImage {
 
 interface SessionState {
   image: PickedImage | null;
-  mode: AppMode;
   query: string;
   loading: boolean;
   error: string | null;
@@ -21,7 +20,6 @@ interface SessionState {
 
 interface SessionActions {
   setImage: (image: PickedImage | null) => void;
-  setMode: (mode: AppMode) => void;
   setQuery: (query: string) => void;
   runAnalysis: () => Promise<boolean>;
   resetResult: () => void;
@@ -34,7 +32,6 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [image, setImage] = useState<PickedImage | null>(null);
-  const [mode, setMode] = useState<AppMode>('search');
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +43,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
     if (!query.trim()) {
-      setError('知りたいことを入力してください。');
+      setError('要望を入力してください。');
       return false;
     }
 
@@ -59,12 +56,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         mediaType: prepared.mediaType,
         imageWidth: prepared.width,
         imageHeight: prepared.height,
-        mode,
         query: query.trim(),
       });
 
       setResult({
-        mode,
         query: query.trim(),
         answer: raw.answer,
         notFound: raw.not_found,
@@ -85,7 +80,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [image, mode, query]);
+  }, [image, query]);
 
   const resetResult = useCallback(() => {
     setResult(null);
@@ -97,20 +92,18 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<SessionContextValue>(
     () => ({
       image,
-      mode,
       query,
       loading,
       error,
       result,
       hasApiKey: hasApiKeyFn(),
       setImage,
-      setMode,
       setQuery,
       runAnalysis,
       resetResult,
       clearError,
     }),
-    [image, mode, query, loading, error, result, runAnalysis, resetResult, clearError]
+    [image, query, loading, error, result, runAnalysis, resetResult, clearError]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

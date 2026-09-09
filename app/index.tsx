@@ -15,21 +15,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Badge } from '../components/Badge';
-import { ModeToggle } from '../components/ModeToggle';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SuggestionChips } from '../components/SuggestionChips';
 import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
 
-const PLACEHOLDER: Record<'search' | 'recommend', string> = {
-  search: '例：緑のモンスターはどこ？',
-  recommend: '例：一番カロリーが低いお菓子は？',
-};
+const PLACEHOLDER = '例：緑のモンスターはどこ？ / 一番カロリーが低いお菓子は？';
 
 export default function HomeScreen() {
-  const { image, setImage, mode, setMode, query, setQuery, loading, error, clearError, runAnalysis, hasApiKey } =
-    useSession();
+  const { image, setImage, query, setQuery, loading, error, clearError, runAnalysis, hasApiKey } = useSession();
 
   const pickFromLibrary = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -130,21 +124,18 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <Text style={styles.sectionLabel}>2. モード</Text>
-          <ModeToggle value={mode} onChange={setMode} />
-
-          <Text style={styles.sectionLabel}>3. 知りたいこと</Text>
+          <Text style={styles.sectionLabel}>2. 要望</Text>
           <View style={styles.inputCard}>
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder={PLACEHOLDER[mode]}
+              placeholder={PLACEHOLDER}
               placeholderTextColor={colors.inkFaint}
               style={styles.input}
               multiline
             />
           </View>
-          <SuggestionChips mode={mode} onPick={setQuery} />
+          <SuggestionChips onPick={setQuery} />
 
           {error && (
             <View style={styles.errorCard}>
@@ -157,7 +148,7 @@ export default function HomeScreen() {
 
           <View style={styles.submitWrap}>
             <PrimaryButton
-              label={mode === 'search' ? 'さがす' : 'おすすめを見る'}
+              label="答えを見る"
               onPress={onSubmit}
               loading={loading}
               disabled={!image || !query.trim()}
@@ -166,12 +157,6 @@ export default function HomeScreen() {
               <Text style={styles.loadingHint}>AIが棚を確認しています…（数秒〜10秒ほど）</Text>
             )}
           </View>
-
-          {mode === 'recommend' && (
-            <View style={styles.footNote}>
-              <Badge label="商品情報はAIが判断" tone="neutral" />
-            </View>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -309,9 +294,5 @@ const styles = StyleSheet.create({
     ...font.caption,
     color: colors.inkFaint,
     textAlign: 'center',
-  },
-  footNote: {
-    alignItems: 'center',
-    marginTop: spacing.xs,
   },
 });

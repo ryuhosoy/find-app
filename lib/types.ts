@@ -1,5 +1,3 @@
-export type AppMode = 'search' | 'recommend';
-
 export type Confidence = 'high' | 'medium' | 'low';
 
 /** 0-1 スケールの正規化座標 [x_min, y_min, x_max, y_max]（左上原点）。 */
@@ -27,7 +25,6 @@ export interface RawAnalysis {
 
 /** アプリ内で使う解析結果 */
 export interface AnalysisResult {
-  mode: AppMode;
   query: string;
   answer: string;
   notFound: boolean;
