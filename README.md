@@ -21,11 +21,36 @@
 ```bash
 npm install
 cp .env.example .env
-# .env を開いて EXPO_PUBLIC_ANTHROPIC_API_KEY にAPIキーを設定
+# .env を開いて EXPO_PUBLIC_ANTHROPIC_API_KEY と
+# EXPO_PUBLIC_REVENUECAT_IOS_API_KEY（必要なら Android キーも）を設定
 npm run ios     # または npm run android / npm run web
 ```
 
 `.env` を編集したら開発サーバーを再起動してください（環境変数はビルド時に埋め込まれるため）。
+
+### 課金（RevenueCat）
+
+- 無料ユーザーは解析を **3回まで** 利用できます。成功した解析のみ回数にカウントします。
+- 上限到達後は RevenueCat の Paywall を表示し、Entitlement `premium` が有効なら無制限になります。
+- RevenueCat ダッシュボードで Offering / Paywall / Entitlement（`premium`）を用意し、
+  App Store / Play の製品と紐づけてください。
+- StoreKit / Play Billing はネイティブモジュールのため、**Expo Go では課金できません**。
+
+#### Paywall のテスト手順（Test Store）
+
+1. `.env` に Test Store の SDK API Key（`test_...`）を入れる  
+   `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=test_...`
+2. 開発クライアントをビルドして起動（初回のみ数分かかる）:
+
+```bash
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+npx expo run:ios
+```
+
+3. ホームの「プレミアム」をタップ → Paywall が出れば OK  
+4. Test Store では購入成功 / 失敗をシミュレートするダイアログが出ます
+
+本番提出前は `test_` キーを `appl_` / `goog_` に切り替えてください。
 
 ## 技術構成
 
@@ -37,6 +62,8 @@ npm run ios     # または npm run android / npm run web
 - 結果の枠描画: 正規化座標をパーセント換算し、画像の上に絶対配置のViewを重ねる（`components/ShelfCanvas.tsx`）
 - 自社商品DB: `data/products.ts`（コンビニ主要商品のカロリー・カフェイン量などの参考値と、
   AIの表記ゆれを吸収するあいまい一致ロジック）
+- 課金: RevenueCat（`react-native-purchases` / `react-native-purchases-ui`）+ AsyncStorage の無料回数管理
+  （`lib/purchases.ts` / `lib/usageLimit.ts`）
 
 ## 既知の制約・精度リスク（要件書どおり）
 

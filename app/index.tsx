@@ -17,13 +17,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SuggestionChips } from '../components/SuggestionChips';
+import { FREE_ANALYSIS_LIMIT } from '../lib/constants/subscription';
 import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
 
 const PLACEHOLDER = '例：緑のモンスターはどこ？ / 一番カロリーが低いお菓子は？';
 
 export default function HomeScreen() {
-  const { image, setImage, query, setQuery, loading, error, clearError, runAnalysis, hasApiKey } = useSession();
+  const {
+    image,
+    setImage,
+    query,
+    setQuery,
+    loading,
+    error,
+    clearError,
+    runAnalysis,
+    openPaywall,
+    hasApiKey,
+    isPremium,
+    remainingUses,
+    hasReachedLimit,
+    billingReady,
+  } = useSession();
 
   const pickFromLibrary = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -80,12 +96,37 @@ export default function HomeScreen() {
               <View style={styles.logoBadge}>
                 <Text style={styles.logoEmoji}>🛒</Text>
               </View>
-              <View>
+              <View style={styles.brandText}>
                 <Text style={styles.brand}>Buy it!</Text>
                 <Text style={styles.tagline}>棚を撮って、買う一つを決める。</Text>
               </View>
             </View>
+            {billingReady && !isPremium && (
+              <View style={styles.usageRow}>
+                <Text style={styles.usageText}>
+                  無料残り {remainingUses}/{FREE_ANALYSIS_LIMIT} 回
+                </Text>
+                <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
+                  <Text style={styles.upgradeChipText}>プレミアム</Text>
+                </Pressable>
+              </View>
+            )}
+            {billingReady && isPremium && (
+              <View style={styles.premiumBadge}>
+                <Text style={styles.premiumBadgeText}>プレミアム利用中</Text>
+              </View>
+            )}
           </View>
+
+          {hasReachedLimit && (
+            <View style={styles.limitCard}>
+              <Text style={styles.limitTitle}>無料枠を使い切りました</Text>
+              <Text style={styles.limitBody}>
+                プレミアムに加入すると、何度でも棚を解析できます。
+              </Text>
+              <PrimaryButton label="プレミアムを見る" onPress={() => void openPaywall()} />
+            </View>
+          )}
 
           {!hasApiKey && (
             <View style={styles.warningCard}>
@@ -148,10 +189,10 @@ export default function HomeScreen() {
 
           <View style={styles.submitWrap}>
             <PrimaryButton
-              label="答えを見る"
-              onPress={onSubmit}
+              label={hasReachedLimit ? 'プレミアムで続ける' : '答えを見る'}
+              onPress={hasReachedLimit ? () => void openPaywall() : onSubmit}
               loading={loading}
-              disabled={!image || !query.trim()}
+              disabled={hasReachedLimit ? false : !image || !query.trim()}
             />
             {loading && (
               <Text style={styles.loadingHint}>AIが棚を確認しています…（数秒〜10秒ほど）</Text>
@@ -179,6 +220,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  brandText: { flex: 1 },
   logoBadge: {
     width: 52,
     height: 52,
@@ -198,6 +240,47 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
     marginTop: 2,
   },
+  usageRow: {
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  usageText: {
+    ...font.caption,
+    color: colors.inkSoft,
+  },
+  upgradeChip: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  upgradeChipText: {
+    ...font.tiny,
+    color: colors.accentDeep,
+  },
+  premiumBadge: {
+    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.goodSoft,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  premiumBadgeText: {
+    ...font.tiny,
+    color: colors.good,
+  },
+  limitCard: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  limitTitle: { ...font.bodyStrong, color: colors.accentDeep },
+  limitBody: { ...font.caption, color: colors.inkSoft, lineHeight: 18 },
   warningCard: {
     backgroundColor: colors.highlightSoft,
     borderRadius: radius.md,
