@@ -124,7 +124,7 @@ export default function HomeScreen() {
               <Text style={styles.limitBody}>
                 プレミアムに加入すると、何度でも棚を解析できます。
               </Text>
-              <PrimaryButton label="プレミアムを見る" onPress={() => void openPaywall()} />
+              <PrimaryButton label="プレミアムで続ける" onPress={() => void openPaywall()} />
             </View>
           )}
 
