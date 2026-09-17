@@ -67,7 +67,7 @@ export default function ResultScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.topRow}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scrollContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
     gap: spacing.sm,
   },
   topRow: {

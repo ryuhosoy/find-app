@@ -80,7 +80,7 @@ export default function HomeScreen() {
   }, [runAnalysis]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -91,32 +91,24 @@ export default function HomeScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <View style={styles.brandRow}>
-              <View style={styles.logoBadge}>
-                <Text style={styles.logoEmoji}>🛒</Text>
-              </View>
-              <View style={styles.brandText}>
-                <Text style={styles.brand}>Buy it!</Text>
-                <Text style={styles.tagline}>棚を撮って、買う一つを決める。</Text>
-              </View>
+          {billingReady && (
+            <View style={styles.header}>
+              {!isPremium ? (
+                <View style={styles.usageRow}>
+                  <Text style={styles.usageText}>
+                    無料残り {remainingUses}/{FREE_ANALYSIS_LIMIT} 回
+                  </Text>
+                  <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
+                    <Text style={styles.upgradeChipText}>プレミアム</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={styles.premiumBadge}>
+                  <Text style={styles.premiumBadgeText}>プレミアム利用中</Text>
+                </View>
+              )}
             </View>
-            {billingReady && !isPremium && (
-              <View style={styles.usageRow}>
-                <Text style={styles.usageText}>
-                  無料残り {remainingUses}/{FREE_ANALYSIS_LIMIT} 回
-                </Text>
-                <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
-                  <Text style={styles.upgradeChipText}>プレミアム</Text>
-                </Pressable>
-              </View>
-            )}
-            {billingReady && isPremium && (
-              <View style={styles.premiumBadge}>
-                <Text style={styles.premiumBadgeText}>プレミアム利用中</Text>
-              </View>
-            )}
-          </View>
+          )}
 
           {hasReachedLimit && (
             <View style={styles.limitCard}>
@@ -209,39 +201,12 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scrollContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
     gap: spacing.sm,
   },
   header: {
     marginBottom: spacing.sm,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  brandText: { flex: 1 },
-  logoBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadow.button,
-  },
-  logoEmoji: { fontSize: 26 },
-  brand: {
-    ...font.display,
-    color: colors.ink,
-  },
-  tagline: {
-    ...font.caption,
-    color: colors.inkSoft,
-    marginTop: 2,
-  },
   usageRow: {
-    marginTop: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -262,7 +227,6 @@ const styles = StyleSheet.create({
     color: colors.accentDeep,
   },
   premiumBadge: {
-    marginTop: spacing.sm,
     alignSelf: 'flex-start',
     backgroundColor: colors.goodSoft,
     borderRadius: radius.pill,
