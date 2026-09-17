@@ -92,7 +92,7 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           {billingReady && (
-            <View style={styles.header}>
+            <View>
               {!isPremium ? (
                 <View style={styles.usageRow}>
                   <Text style={styles.usageText}>
@@ -203,9 +203,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.sm,
   },
-  header: {
-    marginBottom: spacing.sm,
-  },
   usageRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -256,7 +253,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     ...font.subtitle,
     color: colors.inkSoft,
-    marginTop: spacing.sm,
   },
   pickerCard: {
     borderWidth: 2,
