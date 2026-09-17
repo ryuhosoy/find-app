@@ -189,7 +189,7 @@ export default function HomeScreen() {
 
           <View style={styles.submitWrap}>
             <PrimaryButton
-              label={hasReachedLimit ? 'プレミアムで続ける' : '答えを見る'}
+              label={hasReachedLimit ? 'プレミアムで続ける' : 'さがす'}
               onPress={hasReachedLimit ? () => void openPaywall() : onSubmit}
               loading={loading}
               disabled={hasReachedLimit ? false : !image || !query.trim()}
