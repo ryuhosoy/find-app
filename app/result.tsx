@@ -115,7 +115,6 @@ export default function ResultScreen() {
             <ProductCard
               name={result.recommended.name}
               reason={result.recommended.reason}
-              confidence={result.recommended.confidence}
               emphasis
             />
           </>
@@ -130,7 +129,6 @@ export default function ResultScreen() {
                   key={`${m.name}-${i}`}
                   name={m.name}
                   reason={m.note}
-                  confidence={m.confidence}
                   compact
                 />
               ))}
@@ -143,7 +141,7 @@ export default function ResultScreen() {
             <Text style={styles.sectionLabel}>見つかった商品</Text>
             <View style={styles.candidateList}>
               {result.matches.map((m, i) => (
-                <ProductCard key={`${m.name}-${i}`} name={m.name} reason={m.note} confidence={m.confidence} />
+                <ProductCard key={`${m.name}-${i}`} name={m.name} reason={m.note} />
               ))}
             </View>
           </>

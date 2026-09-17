@@ -2,25 +2,17 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
-import type { Confidence } from '../lib/types';
 import { Badge } from './Badge';
 
 interface Props {
   name: string;
   reason?: string;
-  confidence: Confidence;
   emphasis?: boolean;
   /** 候補リストなど、短い注記のみの表示 */
   compact?: boolean;
 }
 
-const CONFIDENCE_LABEL: Record<Confidence, string> = {
-  high: '確信度: 高',
-  medium: '確信度: 中',
-  low: '確信度: 低（見え方によっては別商品の可能性）',
-};
-
-export function ProductCard({ name, reason, confidence, emphasis, compact }: Props) {
+export function ProductCard({ name, reason, emphasis, compact }: Props) {
   return (
     <View style={[styles.card, emphasis && styles.cardEmphasis, emphasis && shadow.card]}>
       <View style={styles.headerRow}>
@@ -31,8 +23,6 @@ export function ProductCard({ name, reason, confidence, emphasis, compact }: Pro
       </View>
 
       {reason ? <Text style={styles.reason}>{reason}</Text> : null}
-
-      <Text style={styles.confidence}>{CONFIDENCE_LABEL[confidence]}</Text>
 
       {!compact && (
         <Text style={styles.disclaimer}>
@@ -72,10 +62,6 @@ const styles = StyleSheet.create({
     ...font.body,
     color: colors.inkSoft,
     lineHeight: 21,
-  },
-  confidence: {
-    ...font.tiny,
-    color: colors.inkFaint,
   },
   disclaimer: {
     ...font.tiny,
