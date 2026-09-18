@@ -7,6 +7,7 @@ import { ImagePreviewModal } from '../components/ImagePreviewModal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ProductCard } from '../components/ProductCard';
 import { CanvasBox, ShelfCanvas } from '../components/ShelfCanvas';
+import { isJapanese, t } from '../lib/i18n';
 import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
 
@@ -48,8 +49,8 @@ export default function ResultScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.emptyWrap}>
-          <Text style={styles.emptyText}>結果がありません。トップに戻ってやり直してください。</Text>
-          <PrimaryButton label="トップへ戻る" onPress={() => router.replace('/')} />
+          <Text style={styles.emptyText}>{t('emptyResult')}</Text>
+          <PrimaryButton label={t('backToTop')} onPress={() => router.replace('/')} />
         </View>
       </SafeAreaView>
     );
@@ -71,11 +72,13 @@ export default function ResultScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.topRow}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← 戻る</Text>
+            <Text style={styles.backText}>{t('back')}</Text>
           </Pressable>
         </View>
 
-        <Text style={styles.queryLabel}>「{query}」</Text>
+        <Text style={styles.queryLabel}>
+          {isJapanese() ? `「${query}」` : `"${query}"`}
+        </Text>
 
         <ShelfCanvas
           imageUri={result.imageUri}
@@ -96,22 +99,22 @@ export default function ResultScreen() {
 
         {!result.recommended && (
           <View style={styles.answerCard}>
-            <Text style={styles.answerText}>{result.answer || (result.notFound ? '見つかりませんでした。' : '')}</Text>
+            <Text style={styles.answerText}>
+              {result.answer || (result.notFound ? t('notFoundFallback') : '')}
+            </Text>
           </View>
         )}
 
         {result.notFound && (
           <View style={styles.notFoundCard}>
-            <Text style={styles.notFoundTitle}>🙈 見つかりませんでした</Text>
-            <Text style={styles.notFoundBody}>
-              言葉を変えてみるか、パッケージがはっきり写る角度でもう一度撮影してみてください。
-            </Text>
+            <Text style={styles.notFoundTitle}>{t('notFoundTitle')}</Text>
+            <Text style={styles.notFoundBody}>{t('notFoundBody')}</Text>
           </View>
         )}
 
         {result.recommended && (
           <>
-            <Text style={styles.sectionLabel}>🎯 イチオシ</Text>
+            <Text style={styles.sectionLabel}>{t('recommendedLabel')}</Text>
             <ProductCard
               name={result.recommended.name}
               reason={result.recommended.reason}
@@ -122,15 +125,10 @@ export default function ResultScreen() {
 
         {otherCandidates.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>比較した他の候補</Text>
+            <Text style={styles.sectionLabel}>{t('otherCandidates')}</Text>
             <View style={styles.candidateList}>
               {otherCandidates.map((m, i) => (
-                <ProductCard
-                  key={`${m.name}-${i}`}
-                  name={m.name}
-                  reason={m.note}
-                  compact
-                />
+                <ProductCard key={`${m.name}-${i}`} name={m.name} reason={m.note} compact />
               ))}
             </View>
           </>
@@ -138,7 +136,7 @@ export default function ResultScreen() {
 
         {!result.recommended && result.matches.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>見つかった商品</Text>
+            <Text style={styles.sectionLabel}>{t('foundProducts')}</Text>
             <View style={styles.candidateList}>
               {result.matches.map((m, i) => (
                 <ProductCard key={`${m.name}-${i}`} name={m.name} reason={m.note} />
@@ -149,10 +147,10 @@ export default function ResultScreen() {
 
         <View style={styles.actionsRow}>
           <View style={styles.actionHalf}>
-            <PrimaryButton label="もう一度きく" onPress={goRetry} variant="secondary" />
+            <PrimaryButton label={t('askAgain')} onPress={goRetry} variant="secondary" />
           </View>
           <View style={styles.actionHalf}>
-            <PrimaryButton label="写真を変える" onPress={goNewPhoto} variant="ghost" />
+            <PrimaryButton label={t('changePhoto')} onPress={goNewPhoto} variant="ghost" />
           </View>
         </View>
       </ScrollView>

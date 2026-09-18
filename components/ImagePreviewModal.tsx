@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'r
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, font, radius, spacing } from '../lib/theme';
+import { t } from '../lib/i18n';
 import { CanvasBox, ShelfCanvas } from './ShelfCanvas';
 import { ZoomableView } from './ZoomableView';
 
@@ -50,7 +51,7 @@ export function ImagePreviewModal({
           style={StyleSheet.absoluteFill}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="閉じる"
+          accessibilityLabel={t('close')}
         />
 
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']} pointerEvents="box-none">
@@ -79,11 +80,11 @@ export function ImagePreviewModal({
               style={styles.closeBtn}
               onPress={onClose}
               accessibilityRole="button"
-              accessibilityLabel="閉じる"
+              accessibilityLabel={t('close')}
             >
-              <Text style={styles.closeText}>✕ 閉じる</Text>
+              <Text style={styles.closeText}>{t('closeWithX')}</Text>
             </Pressable>
-            <Text style={styles.hint}>2本指でピンチして拡大・縮小</Text>
+            <Text style={styles.hint}>{t('pinchHint')}</Text>
           </View>
         </SafeAreaView>
       </View>

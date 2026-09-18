@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { t } from '../lib/i18n';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
 import { Badge } from './Badge';
 
@@ -19,16 +20,12 @@ export function ProductCard({ name, reason, emphasis, compact }: Props) {
         <Text style={styles.name} numberOfLines={2}>
           {name}
         </Text>
-        <Badge label="🤖 AI判断" tone="neutral" />
+        <Badge label={t('aiJudgment')} tone="neutral" />
       </View>
 
       {reason ? <Text style={styles.reason}>{reason}</Text> : null}
 
-      {!compact && (
-        <Text style={styles.disclaimer}>
-          商品名・理由・数値はAIの判断です。正確な情報は必ずパッケージをご確認ください。
-        </Text>
-      )}
+      {!compact && <Text style={styles.disclaimer}>{t('productDisclaimer')}</Text>}
     </View>
   );
 }

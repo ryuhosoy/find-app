@@ -1,5 +1,6 @@
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
+import { t } from './i18n';
 import { resizedSize } from './visionCoords';
 
 export interface PreparedImage {
@@ -40,7 +41,7 @@ export async function prepareImageForApi(uri: string): Promise<PreparedImage> {
       });
 
   if (!result.base64) {
-    throw new Error('画像の変換に失敗しました。');
+    throw new Error(t('errorImageConvert'));
   }
 
   return {

@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 
+import { t } from '../lib/i18n';
 import { colors, radius } from '../lib/theme';
 import type { Box2D } from '../lib/types';
 
@@ -86,7 +87,7 @@ export function ShelfCanvas({
         onLayout={onLayout}
         style={({ pressed }) => [...wrapStyle, pressed && styles.wrapPressed]}
         accessibilityRole="button"
-        accessibilityLabel="結果画像を拡大表示"
+        accessibilityLabel={t('resultImageA11y')}
       >
         {canvas}
       </Pressable>

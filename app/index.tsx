@@ -18,10 +18,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SuggestionChips } from '../components/SuggestionChips';
 import { FREE_ANALYSIS_LIMIT } from '../lib/constants/subscription';
+import { t } from '../lib/i18n';
 import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
-
-const PLACEHOLDER = '例：緑のモンスターはどこ？ / 一番カロリーが低いお菓子は？';
 
 export default function HomeScreen() {
   const {
@@ -44,7 +43,7 @@ export default function HomeScreen() {
   const pickFromLibrary = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('写真ライブラリへのアクセスが必要です', '設定アプリから許可してください。');
+      Alert.alert(t('photoLibraryPermissionTitle'), t('photoLibraryPermissionBody'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -61,7 +60,7 @@ export default function HomeScreen() {
   const takePhoto = useCallback(async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('カメラへのアクセスが必要です', '設定アプリから許可してください。');
+      Alert.alert(t('cameraPermissionTitle'), t('cameraPermissionBody'));
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -96,15 +95,15 @@ export default function HomeScreen() {
               {!isPremium ? (
                 <View style={styles.usageRow}>
                   <Text style={styles.usageText}>
-                    無料残り {remainingUses}/{FREE_ANALYSIS_LIMIT} 回
+                    {t('freeRemaining', { remaining: remainingUses, limit: FREE_ANALYSIS_LIMIT })}
                   </Text>
                   <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
-                    <Text style={styles.upgradeChipText}>プレミアム</Text>
+                    <Text style={styles.upgradeChipText}>{t('premium')}</Text>
                   </Pressable>
                 </View>
               ) : (
                 <View style={styles.premiumBadge}>
-                  <Text style={styles.premiumBadgeText}>プレミアム利用中</Text>
+                  <Text style={styles.premiumBadgeText}>{t('premiumActive')}</Text>
                 </View>
               )}
             </View>
@@ -112,57 +111,56 @@ export default function HomeScreen() {
 
           {hasReachedLimit && (
             <View style={styles.limitCard}>
-              <Text style={styles.limitTitle}>無料枠を使い切りました</Text>
-              <Text style={styles.limitBody}>
-                プレミアムに加入すると、何度でも棚を解析できます。
-              </Text>
-              <PrimaryButton label="プレミアムで続ける" onPress={() => void openPaywall()} />
+              <Text style={styles.limitTitle}>{t('freeLimitTitle')}</Text>
+              <Text style={styles.limitBody}>{t('freeLimitBody')}</Text>
+              <PrimaryButton label={t('continueWithPremium')} onPress={() => void openPaywall()} />
             </View>
           )}
 
           {!hasApiKey && (
             <View style={styles.warningCard}>
-              <Text style={styles.warningTitle}>⚠️ APIキー未設定</Text>
-              <Text style={styles.warningBody}>
-                .env に EXPO_PUBLIC_ANTHROPIC_API_KEY を設定して開発サーバーを再起動してください。詳しくは
-                README をご覧ください。
-              </Text>
+              <Text style={styles.warningTitle}>{t('apiKeyMissingTitle')}</Text>
+              <Text style={styles.warningBody}>{t('apiKeyMissingBody')}</Text>
             </View>
           )}
 
-          <Text style={styles.sectionLabel}>1. 棚の写真</Text>
+          <Text style={styles.sectionLabel}>{t('sectionPhoto')}</Text>
           {image ? (
             <View style={styles.imagePreviewWrap}>
               <Image source={{ uri: image.uri }} style={styles.imagePreview} contentFit="cover" />
               <View style={styles.imageActionsRow}>
                 <Pressable style={styles.smallAction} onPress={takePhoto}>
-                  <Text style={styles.smallActionText}>📷 撮り直す</Text>
+                  <Text style={styles.smallActionText}>{t('retakePhoto')}</Text>
                 </Pressable>
                 <Pressable style={styles.smallAction} onPress={pickFromLibrary}>
-                  <Text style={styles.smallActionText}>🖼️ 選び直す</Text>
+                  <Text style={styles.smallActionText}>{t('rechoosePhoto')}</Text>
                 </Pressable>
               </View>
             </View>
           ) : (
             <View style={styles.pickerCard}>
               <Text style={styles.pickerEmoji}>📸</Text>
-              <Text style={styles.pickerTitle}>棚の写真を用意しよう</Text>
-              <Text style={styles.pickerSubtitle}>商品パッケージがはっきり写るように撮ってね</Text>
+              <Text style={styles.pickerTitle}>{t('pickerTitle')}</Text>
+              <Text style={styles.pickerSubtitle}>{t('pickerSubtitle')}</Text>
               <View style={styles.pickerButtonsRow}>
-                <PrimaryButton label="写真を撮る" onPress={takePhoto} variant="primary" />
+                <PrimaryButton label={t('takePhoto')} onPress={takePhoto} variant="primary" />
               </View>
               <View style={styles.pickerButtonsRow}>
-                <PrimaryButton label="ライブラリから選ぶ" onPress={pickFromLibrary} variant="secondary" />
+                <PrimaryButton
+                  label={t('pickFromLibrary')}
+                  onPress={pickFromLibrary}
+                  variant="secondary"
+                />
               </View>
             </View>
           )}
 
-          <Text style={styles.sectionLabel}>2. 要望</Text>
+          <Text style={styles.sectionLabel}>{t('sectionQuery')}</Text>
           <View style={styles.inputCard}>
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder={PLACEHOLDER}
+              placeholder={t('queryPlaceholder')}
               placeholderTextColor={colors.inkFaint}
               style={styles.input}
               multiline
@@ -174,21 +172,19 @@ export default function HomeScreen() {
             <View style={styles.errorCard}>
               <Text style={styles.errorText}>{error}</Text>
               <Pressable onPress={clearError}>
-                <Text style={styles.errorDismiss}>閉じる</Text>
+                <Text style={styles.errorDismiss}>{t('dismiss')}</Text>
               </Pressable>
             </View>
           )}
 
           <View style={styles.submitWrap}>
             <PrimaryButton
-              label={hasReachedLimit ? 'プレミアムで続ける' : 'さがす'}
+              label={hasReachedLimit ? t('continueWithPremium') : t('search')}
               onPress={hasReachedLimit ? () => void openPaywall() : onSubmit}
               loading={loading}
               disabled={hasReachedLimit ? false : !image || !query.trim()}
             />
-            {loading && (
-              <Text style={styles.loadingHint}>AIが棚を確認しています…（数秒〜10秒ほど）</Text>
-            )}
+            {loading && <Text style={styles.loadingHint}>{t('loadingHint')}</Text>}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 
 import { analyzeShelf, ClaudeApiError, ClaudeConfigError, hasApiKey as hasApiKeyFn } from './claude';
 import { FREE_ANALYSIS_LIMIT } from './constants/subscription';
+import { t } from './i18n';
 import { prepareImageForApi } from './imagePrep';
 import {
   configurePurchases,
@@ -81,10 +82,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
     if (outcome === 'unavailable' || outcome === 'error') {
       Alert.alert(
-        'Paywallを表示できません',
-        outcome === 'unavailable'
-          ? 'RevenueCat の API キー未設定、または Web / Expo Go では課金UIを開けません。開発ビルド（npx expo run:ios）で試してください。'
-          : 'Paywallの表示に失敗しました。開発ビルドで起動しているか、RevenueCat の Current Offering / Paywall 設定を確認してください。'
+        t('paywallUnavailableTitle'),
+        outcome === 'unavailable' ? t('paywallUnavailableBody') : t('paywallErrorBody')
       );
     }
     return false;
@@ -92,18 +91,18 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const runAnalysis = useCallback(async (): Promise<boolean> => {
     if (!image) {
-      setError('まず写真を選んでください。');
+      setError(t('errorNeedPhoto'));
       return false;
     }
     if (!query.trim()) {
-      setError('要望を入力してください。');
+      setError(t('errorNeedQuery'));
       return false;
     }
 
     if (!isPremium && usageCount >= FREE_ANALYSIS_LIMIT) {
       const unlocked = await openPaywall();
       if (!unlocked) {
-        setError(`無料枠（${FREE_ANALYSIS_LIMIT}回）を使い切りました。プレミアムに加入すると続けて使えます。`);
+        setError(t('errorFreeLimitReached', { limit: FREE_ANALYSIS_LIMIT }));
         return false;
       }
     }
@@ -141,7 +140,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       if (e instanceof ClaudeConfigError || e instanceof ClaudeApiError) {
         setError(e.message);
       } else {
-        setError('解析中に予期しないエラーが発生しました。もう一度お試しください。');
+        setError(t('errorUnexpected'));
       }
       return false;
     } finally {

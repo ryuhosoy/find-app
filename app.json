@@ -41,8 +41,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "棚の写真を選ぶために写真ライブラリへのアクセスを使用します。",
-          "cameraPermission": "棚を撮影するためにカメラへのアクセスを使用します。"
+          "photosPermission": "Buy it! uses your photo library to choose a shelf photo. / 棚の写真を選ぶために写真ライブラリへのアクセスを使用します。",
+          "cameraPermission": "Buy it! uses the camera to photograph store shelves. / 棚を撮影するためにカメラへのアクセスを使用します。"
         }
       ]
     ],
