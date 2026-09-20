@@ -13,7 +13,7 @@
     },
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.ryuhosoy.buyit",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

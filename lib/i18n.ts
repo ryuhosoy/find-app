@@ -1,20 +1,56 @@
+import { NativeModules, Platform, Settings } from 'react-native';
+
 export type AppLocale = 'ja' | 'en';
 
+/**
+ * 端末の「優先言語」を取る。
+ * - Intl は iOS で「地域」寄りになりやすい
+ * - NativeModules.SettingsManager は New Architecture で空になりやすい → Settings API を使う
+ */
 function detectLanguageTag(): string {
+  if (Platform.OS === 'ios') {
+    try {
+      const languages = Settings.get('AppleLanguages');
+      if (Array.isArray(languages) && typeof languages[0] === 'string' && languages[0]) {
+        return languages[0];
+      }
+      const appleLocale = Settings.get('AppleLocale');
+      if (typeof appleLocale === 'string' && appleLocale) {
+        return appleLocale;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (Platform.OS === 'android') {
+    try {
+      const locale =
+        NativeModules.I18nManager?.localeIdentifier ??
+        NativeModules.I18nManager?.getConstants?.()?.localeIdentifier;
+      if (typeof locale === 'string' && locale.length > 0) return locale;
+    } catch {
+      // ignore
+    }
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language;
+  }
+
   try {
     const fromIntl = Intl.DateTimeFormat().resolvedOptions().locale;
     if (fromIntl) return fromIntl;
   } catch {
     // ignore
   }
-  if (typeof navigator !== 'undefined' && navigator.language) {
-    return navigator.language;
-  }
+
   return 'en';
 }
 
 export function getAppLocale(): AppLocale {
-  return detectLanguageTag().toLowerCase().startsWith('ja') ? 'ja' : 'en';
+  const tag = detectLanguageTag().toLowerCase().replace(/_/g, '-');
+  return tag === 'ja' || tag.startsWith('ja-') ? 'ja' : 'en';
 }
 
 export function isJapanese(): boolean {
