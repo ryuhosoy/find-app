@@ -3,11 +3,28 @@ import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
 
 import { PREMIUM_ENTITLEMENT } from './constants/subscription';
+import { getAppLocale } from './i18n';
 
 const IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
 const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
 
 export type PaywallOutcome = 'purchased' | 'restored' | 'cancelled' | 'error' | 'unavailable';
+
+/** RevenueCat Paywall Localization の locale（ダッシュボードの `ja` / `en` と揃える） */
+function revenueCatUILocale(): string {
+  return getAppLocale() === 'ja' ? 'ja' : 'en';
+}
+
+/**
+ * Paywall 文言が端末の「優先言語」ではなくアプリ UI 言語に追従するよう、
+ * RC の preferred locale を明示する。変更時は offerings を再取得してキャッシュを更新する。
+ */
+async function syncPaywallLocale(): Promise<void> {
+  const locale = revenueCatUILocale();
+  await Purchases.overridePreferredLocale(locale);
+  // override 後はバックグラウンド再取得になるため、表示前に一度待つ
+  await Purchases.getOfferings();
+}
 
 export function configurePurchases(): void {
   if (Platform.OS === 'web') return;
@@ -18,7 +35,10 @@ export function configurePurchases(): void {
   const apiKey =
     (Platform.OS === 'ios' ? IOS_API_KEY : ANDROID_API_KEY) || IOS_API_KEY || ANDROID_API_KEY;
   if (apiKey) {
-    Purchases.configure({ apiKey });
+    Purchases.configure({
+      apiKey,
+      preferredUILocaleOverride: revenueCatUILocale(),
+    });
   }
 }
 
@@ -72,6 +92,7 @@ export async function presentPaywall(): Promise<PaywallOutcome> {
   if (!apiKey) return 'unavailable';
 
   try {
+    await syncPaywallLocale();
     const paywallResult = await RevenueCatUI.presentPaywall();
     await logCustomerInfo('RevenueCat after paywall');
 
