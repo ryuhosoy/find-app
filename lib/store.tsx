@@ -2,17 +2,18 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { Alert } from 'react-native';
 
 import { analyzeShelf, ClaudeApiError, ClaudeConfigError, hasApiKey as hasApiKeyFn } from './claude';
-import { FREE_ANALYSIS_LIMIT } from './constants/subscription';
+import { FREE_ANALYSIS_LIMIT, type SubscriptionPlan } from './constants/subscription';
 import { t } from './i18n';
 import { prepareImageForApi } from './imagePrep';
 import {
   configurePurchases,
-  isPremiumUser,
+  getSubscriptionAccess,
   logCustomerInfo,
   presentPaywall,
+  type SubscriptionAccess,
 } from './purchases';
 import type { AnalysisResult } from './types';
-import { getAnalysisCount, incrementAnalysisCount } from './usageLimit';
+import { getEffectiveUsageCount, incrementUsageForPeriod } from './usageLimit';
 
 export interface PickedImage {
   uri: string;
@@ -26,7 +27,8 @@ interface SessionState {
   loading: boolean;
   error: string | null;
   result: AnalysisResult | null;
-  isPremium: boolean;
+  plan: SubscriptionPlan;
+  usageLimit: number;
   usageCount: number;
   billingReady: boolean;
 }
@@ -43,11 +45,24 @@ interface SessionActions {
 type SessionContextValue = SessionState &
   SessionActions & {
     hasApiKey: boolean;
+    isPremium: boolean;
     remainingUses: number;
     hasReachedLimit: boolean;
   };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
+
+async function loadAccessAndUsage(): Promise<{
+  access: SubscriptionAccess;
+  usageCount: number;
+}> {
+  const access = await getSubscriptionAccess();
+  const usageCount = await getEffectiveUsageCount(access.periodKey, {
+    isPremium: access.isPremium,
+    limit: access.limit,
+  });
+  return { access, usageCount };
+}
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [image, setImage] = useState<PickedImage | null>(null);
@@ -55,30 +70,39 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
+  const [plan, setPlan] = useState<SubscriptionPlan>('free');
+  const [usageLimit, setUsageLimit] = useState(FREE_ANALYSIS_LIMIT);
+  const [periodKey, setPeriodKey] = useState('free');
   const [usageCount, setUsageCount] = useState(0);
   const [billingReady, setBillingReady] = useState(false);
+
+  const applyAccess = useCallback((access: SubscriptionAccess, count: number) => {
+    setPlan(access.plan);
+    setUsageLimit(access.limit);
+    setPeriodKey(access.periodKey);
+    setUsageCount(count);
+  }, []);
 
   useEffect(() => {
     configurePurchases();
     void (async () => {
       await logCustomerInfo('RevenueCat on launch');
-      const [premium, count] = await Promise.all([isPremiumUser(), getAnalysisCount()]);
-      setIsPremium(premium);
-      setUsageCount(count);
+      const { access, usageCount: count } = await loadAccessAndUsage();
+      applyAccess(access, count);
       setBillingReady(true);
     })();
-  }, []);
+  }, [applyAccess]);
 
-  const hasReachedLimit = !isPremium && usageCount >= FREE_ANALYSIS_LIMIT;
-  const remainingUses = isPremium ? Infinity : Math.max(0, FREE_ANALYSIS_LIMIT - usageCount);
+  const isPremium = plan !== 'free';
+  const hasReachedLimit = usageCount >= usageLimit;
+  const remainingUses = Math.max(0, usageLimit - usageCount);
 
   const openPaywall = useCallback(async (): Promise<boolean> => {
     const outcome = await presentPaywall();
     if (outcome === 'purchased' || outcome === 'restored') {
-      const premium = await isPremiumUser();
-      setIsPremium(premium);
-      return premium;
+      const { access, usageCount: count } = await loadAccessAndUsage();
+      applyAccess(access, count);
+      return access.isPremium;
     }
     if (outcome === 'unavailable' || outcome === 'error') {
       Alert.alert(
@@ -87,7 +111,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       );
     }
     return false;
-  }, []);
+  }, [applyAccess]);
 
   const runAnalysis = useCallback(async (): Promise<boolean> => {
     if (!image) {
@@ -99,10 +123,29 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    if (!isPremium && usageCount >= FREE_ANALYSIS_LIMIT) {
+    let activePeriodKey = periodKey;
+    let activeLimit = usageLimit;
+    let activePlan = plan;
+    let activeCount = usageCount;
+
+    if (activeCount >= activeLimit) {
       const unlocked = await openPaywall();
       if (!unlocked) {
-        setError(t('errorFreeLimitReached', { limit: FREE_ANALYSIS_LIMIT }));
+        setError(
+          activePlan === 'free'
+            ? t('errorFreeLimitReached', { limit: activeLimit })
+            : t('errorPlanLimitReached', { limit: activeLimit })
+        );
+        return false;
+      }
+      const refreshed = await loadAccessAndUsage();
+      applyAccess(refreshed.access, refreshed.usageCount);
+      activePeriodKey = refreshed.access.periodKey;
+      activeLimit = refreshed.access.limit;
+      activePlan = refreshed.access.plan;
+      activeCount = refreshed.usageCount;
+      if (activeCount >= activeLimit) {
+        setError(t('errorPlanLimitReached', { limit: activeLimit }));
         return false;
       }
     }
@@ -130,10 +173,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         imageHeight: prepared.height,
       });
 
-      if (!isPremium) {
-        const count = await incrementAnalysisCount();
-        setUsageCount(count);
-      }
+      const count = await incrementUsageForPeriod(activePeriodKey);
+      // 無料枠を使い切った直後も UI を上限到達に揃える
+      const effectiveCount =
+        activePlan === 'free'
+          ? await getEffectiveUsageCount(activePeriodKey, {
+              isPremium: false,
+              limit: activeLimit,
+            })
+          : count;
+      setUsageCount(effectiveCount);
 
       return true;
     } catch (e) {
@@ -146,7 +195,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [image, query, isPremium, usageCount, openPaywall]);
+  }, [image, query, periodKey, usageLimit, plan, usageCount, openPaywall, applyAccess]);
 
   const resetResult = useCallback(() => {
     setResult(null);
@@ -162,11 +211,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       loading,
       error,
       result,
-      isPremium,
+      plan,
+      usageLimit,
       usageCount,
       billingReady,
       remainingUses,
       hasReachedLimit,
+      isPremium,
       hasApiKey: hasApiKeyFn(),
       setImage,
       setQuery,
@@ -181,11 +232,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       loading,
       error,
       result,
-      isPremium,
+      plan,
+      usageLimit,
       usageCount,
       billingReady,
       remainingUses,
       hasReachedLimit,
+      isPremium,
       runAnalysis,
       openPaywall,
       resetResult,

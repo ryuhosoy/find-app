@@ -17,7 +17,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SuggestionChips } from '../components/SuggestionChips';
-import { FREE_ANALYSIS_LIMIT } from '../lib/constants/subscription';
 import { t } from '../lib/i18n';
 import { useSession } from '../lib/store';
 import { colors, font, radius, shadow, spacing } from '../lib/theme';
@@ -35,10 +34,22 @@ export default function HomeScreen() {
     openPaywall,
     hasApiKey,
     isPremium,
+    plan,
+    usageLimit,
     remainingUses,
     hasReachedLimit,
     billingReady,
   } = useSession();
+
+  const usageLabel =
+    plan === 'weekly'
+      ? t('planRemainingWeekly', { remaining: remainingUses, limit: usageLimit })
+      : plan === 'monthly'
+        ? t('planRemainingMonthly', { remaining: remainingUses, limit: usageLimit })
+        : t('freeRemaining', { remaining: remainingUses, limit: usageLimit });
+
+  const limitTitle = isPremium ? t('planLimitTitle') : t('freeLimitTitle');
+  const limitBody = isPremium ? t('planLimitBody') : t('freeLimitBody');
 
   const pickFromLibrary = useCallback(async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -92,27 +103,25 @@ export default function HomeScreen() {
         >
           {billingReady && (
             <View>
-              {!isPremium ? (
-                <View style={styles.usageRow}>
-                  <Text style={styles.usageText}>
-                    {t('freeRemaining', { remaining: remainingUses, limit: FREE_ANALYSIS_LIMIT })}
-                  </Text>
+              <View style={styles.usageRow}>
+                <Text style={styles.usageText}>{usageLabel}</Text>
+                {!isPremium ? (
                   <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
                     <Text style={styles.upgradeChipText}>{t('premium')}</Text>
                   </Pressable>
-                </View>
-              ) : (
-                <View style={styles.premiumBadge}>
-                  <Text style={styles.premiumBadgeText}>{t('premiumActive')}</Text>
-                </View>
-              )}
+                ) : (
+                  <View style={styles.premiumBadge}>
+                    <Text style={styles.premiumBadgeText}>{t('premiumActive')}</Text>
+                  </View>
+                )}
+              </View>
             </View>
           )}
 
           {hasReachedLimit && (
             <View style={styles.limitCard}>
-              <Text style={styles.limitTitle}>{t('freeLimitTitle')}</Text>
-              <Text style={styles.limitBody}>{t('freeLimitBody')}</Text>
+              <Text style={styles.limitTitle}>{limitTitle}</Text>
+              <Text style={styles.limitBody}>{limitBody}</Text>
               <PrimaryButton label={t('continueWithPremium')} onPress={() => void openPaywall()} />
             </View>
           )}
@@ -220,7 +229,6 @@ const styles = StyleSheet.create({
     color: colors.accentDeep,
   },
   premiumBadge: {
-    alignSelf: 'flex-start',
     backgroundColor: colors.goodSoft,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,

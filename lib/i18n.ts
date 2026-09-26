@@ -61,10 +61,14 @@ type Vars = Record<string, string | number>;
 
 const ja = {
   freeRemaining: '無料残り {remaining}/{limit} 回',
+  planRemainingWeekly: '週額 残り {remaining}/{limit} 回',
+  planRemainingMonthly: '月額 残り {remaining}/{limit} 回',
   premium: 'プレミアム',
   premiumActive: 'プレミアム利用中',
   freeLimitTitle: '無料枠を使い切りました',
-  freeLimitBody: 'プレミアムに加入すると、何度でも棚を解析できます。',
+  freeLimitBody: 'プレミアムに加入すると、さがせる回数が増えます（週額15回 / 月額80回）。',
+  planLimitTitle: '解析枠を使い切りました',
+  planLimitBody: '枠は課金期間の更新でリセットされます。プランを変更する場合はプレミアムから確認できます。',
   continueWithPremium: 'プレミアムで続ける',
   apiKeyMissingTitle: '⚠️ APIキー未設定',
   apiKeyMissingBody:
@@ -116,6 +120,8 @@ const ja = {
   errorNeedQuery: '要望を入力してください。',
   errorFreeLimitReached:
     '無料枠（{limit}回）を使い切りました。プレミアムに加入すると続けて使えます。',
+  errorPlanLimitReached:
+    'この課金期間の枠（{limit}回）を使い切りました。更新まで待つか、別プランをご検討ください。',
   errorUnexpected: '解析中に予期しないエラーが発生しました。もう一度お試しください。',
   errorNoApiKey:
     'ANTHROPIC APIキーが設定されていません。.env の EXPO_PUBLIC_ANTHROPIC_API_KEY を設定して、開発サーバーを再起動してください。',
@@ -135,10 +141,14 @@ const ja = {
 
 const en: { [K in keyof typeof ja]: (typeof ja)[K] extends readonly string[] ? string[] : string } = {
   freeRemaining: 'Free left {remaining}/{limit}',
+  planRemainingWeekly: 'Weekly plan {remaining}/{limit} left',
+  planRemainingMonthly: 'Monthly plan {remaining}/{limit} left',
   premium: 'Premium',
   premiumActive: 'Premium active',
   freeLimitTitle: 'Free searches used up',
-  freeLimitBody: 'Go Premium to search shelves as many times as you want.',
+  freeLimitBody: 'Go Premium for more searches (15/week or 80/month).',
+  planLimitTitle: 'Search limit reached',
+  planLimitBody: 'Your allowance resets when the billing period renews. Open Premium to change plans.',
   continueWithPremium: 'Continue with Premium',
   apiKeyMissingTitle: '⚠️ API key missing',
   apiKeyMissingBody:
@@ -189,6 +199,8 @@ const en: { [K in keyof typeof ja]: (typeof ja)[K] extends readonly string[] ? s
   errorNeedPhoto: 'Please choose a photo first.',
   errorNeedQuery: 'Please enter what you’re looking for.',
   errorFreeLimitReached: 'You’ve used your {limit} free searches. Go Premium to continue.',
+  errorPlanLimitReached:
+    'You’ve used all {limit} searches for this billing period. Wait for renewal or change plans.',
   errorUnexpected: 'Something went wrong while analyzing. Please try again.',
   errorNoApiKey:
     'ANTHROPIC API key is not set. Add EXPO_PUBLIC_ANTHROPIC_API_KEY to .env and restart the dev server.',
