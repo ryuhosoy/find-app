@@ -19,19 +19,6 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-    "android": {
-      "package": "com.ryuhosoy.buyit",
-      "adaptiveIcon": {
-        "backgroundColor": "#FF6B3D",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
-    },
     "web": {
       "favicon": "./assets/favicon.png"
     },

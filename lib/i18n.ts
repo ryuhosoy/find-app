@@ -1,4 +1,4 @@
-import { NativeModules, Platform, Settings } from 'react-native';
+import { Platform, Settings } from 'react-native';
 
 export type AppLocale = 'ja' | 'en';
 
@@ -18,17 +18,6 @@ function detectLanguageTag(): string {
       if (typeof appleLocale === 'string' && appleLocale) {
         return appleLocale;
       }
-    } catch {
-      // ignore
-    }
-  }
-
-  if (Platform.OS === 'android') {
-    try {
-      const locale =
-        NativeModules.I18nManager?.localeIdentifier ??
-        NativeModules.I18nManager?.getConstants?.()?.localeIdentifier;
-      if (typeof locale === 'string' && locale.length > 0) return locale;
     } catch {
       // ignore
     }

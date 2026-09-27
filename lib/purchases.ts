@@ -12,7 +12,6 @@ import {
 import { getAppLocale } from './i18n';
 
 const IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
-const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
 
 export type PaywallOutcome = 'purchased' | 'restored' | 'cancelled' | 'error' | 'unavailable';
 
@@ -54,12 +53,9 @@ export function configurePurchases(): void {
 
   Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.VERBOSE : LOG_LEVEL.INFO);
 
-  // Test Store の test_ キーは1つで両OS共用。片方だけ設定しても動くようにする。
-  const apiKey =
-    (Platform.OS === 'ios' ? IOS_API_KEY : ANDROID_API_KEY) || IOS_API_KEY || ANDROID_API_KEY;
-  if (apiKey) {
+  if (IOS_API_KEY) {
     Purchases.configure({
-      apiKey,
+      apiKey: IOS_API_KEY,
       preferredUILocaleOverride: revenueCatUILocale(),
     });
   }
@@ -159,9 +155,7 @@ export async function logCustomerInfo(tag = 'RevenueCat'): Promise<void> {
 export async function presentPaywall(): Promise<PaywallOutcome> {
   if (Platform.OS === 'web') return 'unavailable';
 
-  const apiKey =
-    (Platform.OS === 'ios' ? IOS_API_KEY : ANDROID_API_KEY) || IOS_API_KEY || ANDROID_API_KEY;
-  if (!apiKey) return 'unavailable';
+  if (!IOS_API_KEY) return 'unavailable';
 
   try {
     await syncPaywallLocale();
