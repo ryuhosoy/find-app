@@ -10,25 +10,15 @@ export const MONTHLY_ANALYSIS_LIMIT = 80;
 /** RevenueCat ダッシュボードで設定した Entitlement ID */
 export const PREMIUM_ENTITLEMENT = 'Buy it! Premium';
 
-/**
- * 週額 / 月額の Product ID。
- * RevenueCat / App Store / Play の実際の ID に合わせて追記する。
- * 未登録でも productId に week / month が含めば自動判定する。
- */
+/** 週額 / 月額の Product ID（完全一致で判定する） */
 export const WEEKLY_PRODUCT_IDS = [
-  '$rc_weekly',
-  'weekly',
-  'buyit_weekly',
-  'buy_it_weekly',
-  'com.ryuhosoy.buyit.weekly',
+  'premium_weekly_buy_it',
+  'premium_weekly',
 ] as const;
 
 export const MONTHLY_PRODUCT_IDS = [
-  '$rc_monthly',
-  'monthly',
-  'buyit_monthly',
-  'buy_it_monthly',
-  'com.ryuhosoy.buyit.monthly',
+  'premium_monthly_buy_it',
+  'premium_monthly',
 ] as const;
 
 export type SubscriptionPlan = 'free' | 'weekly' | 'monthly';
@@ -48,12 +38,11 @@ export function limitForPlan(plan: SubscriptionPlan): number {
 /** productIdentifier から週額 / 月額を判定。不明なら null */
 export function resolvePlanFromProductId(productIdentifier: string): 'weekly' | 'monthly' | null {
   const id = productIdentifier.trim();
-  const lower = id.toLowerCase();
 
-  if ((WEEKLY_PRODUCT_IDS as readonly string[]).includes(id) || /(^|[_.-])week(ly)?($|[_.-])/.test(lower)) {
+  if ((WEEKLY_PRODUCT_IDS as readonly string[]).includes(id)) {
     return 'weekly';
   }
-  if ((MONTHLY_PRODUCT_IDS as readonly string[]).includes(id) || /(^|[_.-])month(ly)?($|[_.-])/.test(lower)) {
+  if ((MONTHLY_PRODUCT_IDS as readonly string[]).includes(id)) {
     return 'monthly';
   }
   return null;
