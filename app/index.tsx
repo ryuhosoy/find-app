@@ -105,15 +105,15 @@ export default function HomeScreen() {
             <View>
               <View style={styles.usageRow}>
                 <Text style={styles.usageText}>{usageLabel}</Text>
-                {!isPremium ? (
-                  <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
-                    <Text style={styles.upgradeChipText}>{t('premium')}</Text>
-                  </Pressable>
-                ) : (
+                {isPremium ? (
                   <View style={styles.premiumBadge}>
                     <Text style={styles.premiumBadgeText}>{t('premiumActive')}</Text>
                   </View>
-                )}
+                ) : hasReachedLimit ? (
+                  <Pressable onPress={() => void openPaywall()} style={styles.upgradeChip}>
+                    <Text style={styles.upgradeChipText}>{t('premium')}</Text>
+                  </Pressable>
+                ) : null}
               </View>
             </View>
           )}
